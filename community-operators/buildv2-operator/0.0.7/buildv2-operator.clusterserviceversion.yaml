@@ -1,0 +1,193 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  annotations:
+    alm-examples: '[]'
+    capabilities: Basic Install
+  name: buildv2-operator.v0.0.7
+  namespace: placeholder
+spec:
+  apiservicedefinitions: {}
+  customresourcedefinitions:
+    owned:
+    - description: BuildRun is the Schema representing an instance of build execution
+      kind: BuildRun
+      name: buildruns.build.dev
+      version: v1alpha1
+    - description: Build is the Schema representing a Build definition
+      kind: Build
+      name: builds.build.dev
+      version: v1alpha1
+    - description: BuildStrategy is the Schema representing a strategy in the namespace
+        scope to build images from source code.
+      kind: BuildStrategy
+      name: buildstrategies.build.dev
+      version: v1alpha1
+    - description: ClusterBuildStrategy is the Schema representing a strategy in the
+        cluster scope to build images from source code.
+      kind: ClusterBuildStrategy
+      name: clusterbuildstrategies.build.dev
+      version: v1alpha1
+  displayName: Buildv2 Operator
+  icon:
+  - base64data: ""
+    mediatype: ""
+  install:
+    spec:
+      clusterPermissions:
+      - rules:
+        - apiGroups:
+          - ""
+          resources:
+          - pods
+          - services
+          - services/finalizers
+          - endpoints
+          - persistentvolumeclaims
+          - events
+          - configmaps
+          - secrets
+          - serviceaccounts
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - apps
+          resources:
+          - deployments
+          - daemonsets
+          - replicasets
+          - statefulsets
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - monitoring.coreos.com
+          resources:
+          - servicemonitors
+          verbs:
+          - get
+          - create
+        - apiGroups:
+          - apps
+          resourceNames:
+          - build-operator
+          resources:
+          - deployments/finalizers
+          verbs:
+          - update
+        - apiGroups:
+          - ""
+          resources:
+          - pods
+          verbs:
+          - get
+        - apiGroups:
+          - apps
+          resources:
+          - replicasets
+          - deployments
+          verbs:
+          - get
+        - apiGroups:
+          - build.dev
+          resources:
+          - '*'
+          - buildstrategies
+          - clusterbuildstrategies
+          - buildruns
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - tekton.dev
+          resources:
+          - tasks
+          - taskruns
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        serviceAccountName: build-operator
+      deployments:
+      - name: build-operator
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              name: build-operator
+          strategy: {}
+          template:
+            metadata:
+              labels:
+                name: build-operator
+            spec:
+              containers:
+              - command:
+                - build-operator
+                env:
+                - name: WATCH_NAMESPACE
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.annotations['olm.targetNamespaces']
+                - name: POD_NAME
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.name
+                - name: OPERATOR_NAME
+                  value: build-operator
+                image: REPLACE_IMAGE
+                imagePullPolicy: Always
+                livenessProbe:
+                  exec:
+                    command:
+                    - stat
+                    - /tmp/operator-sdk-ready
+                  initialDelaySeconds: 5
+                  periodSeconds: 10
+                name: build-operator
+                readinessProbe:
+                  exec:
+                    command:
+                    - stat
+                    - /tmp/operator-sdk-ready
+                  initialDelaySeconds: 5
+                  periodSeconds: 10
+                resources: {}
+              serviceAccountName: build-operator
+    strategy: deployment
+  installModes:
+  - supported: true
+    type: OwnNamespace
+  - supported: true
+    type: SingleNamespace
+  - supported: false
+    type: MultiNamespace
+  - supported: true
+    type: AllNamespaces
+  keywords:
+  - ""
+  maintainers:
+  - {}
+  maturity: alpha
+  provider: {}
+  version: 0.0.7
