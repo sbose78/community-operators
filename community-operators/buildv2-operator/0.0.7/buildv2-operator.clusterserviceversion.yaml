@@ -9,7 +9,7 @@ metadata:
     containerImage: quay.io/redhat-developer/buildv2:91b4a90
     createdAt: "2020-11-06T17:44:55Z"
     description: An API to build images on Kubernetes with diverse strategies
-    repository: https://github.com/redhat-developer/build
+    repository: https://github.com/shipwright-io/build
   name: buildv2-operator.v0.0.7
   namespace: placeholder
 spec:
@@ -224,6 +224,6 @@ spec:
     name: Simon
   maturity: alpha
   provider:
-    name: The Build API Workgroup
+    name: Project Shipwright
   replaces: buildv2-operator.v0.0.6
   version: 0.0.7
